@@ -3,6 +3,7 @@ package com.phoenixx.handlers;
 import com.phoenixx.configs.PhoenixxConfig;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ModContainer;
+import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.List;
  */
 public class AntiCheatHandler
 {
+    private static Minecraft mc = Minecraft.getMinecraft();
+
     public static String getModIDs()
     {
         ArrayList<String> modIDs = new ArrayList<String>();
@@ -36,5 +39,23 @@ public class AntiCheatHandler
         }
 
         return allModsIDsToString;
+    }
+
+    public static String getTexturePacks()
+    {
+        if(!mc.gameSettings.resourcePacks.isEmpty())
+        {
+            ArrayList<String> texturePacks = new ArrayList<String>();
+            texturePacks.addAll(mc.gameSettings.resourcePacks);
+
+            String allModsIDsToString = String.join(",", texturePacks);
+
+            if(PhoenixxConfig.debugClient)
+            {
+                PhoenixxConfig.addEntireListToModFile(allModsIDsToString);
+            }
+            return allModsIDsToString;
+        }
+        return "NONE";
     }
 }

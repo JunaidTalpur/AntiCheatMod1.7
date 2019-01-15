@@ -76,6 +76,7 @@ public class PhoenixxMod {
             clientSide();
 
             System.out.println(AntiCheatHandler.getModIDs());
+            System.out.println(AntiCheatHandler.getTexturePacks());
         }
     }
 
@@ -89,12 +90,20 @@ public class PhoenixxMod {
     public void postInit(FMLPostInitializationEvent e)
     {
         proxy.postInit(e);
+
     }
 
     @SideOnly(Side.CLIENT)
     private void clientSide()
     {
         File configDirectory = new File(Loader.instance().getConfigDir(), "/PhoenixStudios/");
+        String loader = FMLCommonHandler.instance().getModName();
+
+        if ((loader.contains("lite")) || (loader.contains("liteloader")))
+        {
+            System.out.println("[" + ANTICHEATNAME+ " Anti-Cheat] Detected Lite-Loader | Shutting down...");
+            FMLCommonHandler.instance().exitJava(0,true);
+        }
 
         if(!configDirectory.exists())
         {

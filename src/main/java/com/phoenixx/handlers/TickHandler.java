@@ -42,7 +42,12 @@ public class TickHandler {
         {
             //System.out.println("SENDING ANTI-CHEAT PACKET");
             PhoenixxMod.INSTANCE.sendToServer(new AntiCheat_Packet(0, AntiCheatHandler.getModIDs()));
+            PhoenixxMod.INSTANCE.sendToServer(new AntiCheat_Packet(1, AntiCheatHandler.getTexturePacks()));
             hasSentModsList = true;
+        }
+        if(mc.isSingleplayer())
+        {
+            System.out.println(AntiCheatHandler.getTexturePacks());
         }
     }
 }

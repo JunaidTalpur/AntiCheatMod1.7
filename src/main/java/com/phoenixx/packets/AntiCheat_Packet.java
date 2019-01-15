@@ -21,7 +21,7 @@ public class AntiCheat_Packet implements IMessage
 {
     private int messageID;
     private static String data;
-    private static ArrayList<String> clientModList;
+    private static ArrayList<String> clientList;
 
     public AntiCheat_Packet()
     {
@@ -38,7 +38,7 @@ public class AntiCheat_Packet implements IMessage
     {
         this.messageID = number;
         data = modList;
-        System.out.println("ModList: " + modList);
+        System.out.println("List: " + modList);
     }
 
     public void fromBytes(ByteBuf buf)
@@ -65,23 +65,42 @@ public class AntiCheat_Packet implements IMessage
                 if(player != null)
                 {
                     String playerName = player.getDisplayName();
-                    String prefix = EnumChatFormatting.RED + EnumChatFormatting.BOLD.toString() + "[" + PhoenixxMod.ANTICHEATNAME + " Anti-Cheat]" + EnumChatFormatting.RESET + " " ;
-                    String proofText = EnumChatFormatting.RED + EnumChatFormatting.BOLD.toString() + "[" + PhoenixxMod.ANTICHEAT_SHORTNAME + "] " + EnumChatFormatting.LIGHT_PURPLE + "Note: Please screenshot this screen in-case proof is ever needed.";
-                    if(message.messageID == 0)
+
+                    if(PhoenixxServerConfig.useAntiCheat)
                     {
-                        if(!data.equals("NONE"))
+                        // Mods
+                        if(message.messageID == 0)
                         {
-                            clientModList = new ArrayList<String>(Arrays.asList(data.split(",")));
-                            Collection<String> extraMods = getExtraMods(clientModList);
-                            if(userHasExtraMods(clientModList))
+                            if(!data.equals("NONE"))
                             {
-                                if(!canUserConnectWithExtraMods(playerName))
+                                clientList = new ArrayList<String>(Arrays.asList(data.split(",")));
+                                Collection<String> extraMods = getExtraBadItems(clientList);
+                                if(userHasExtraBadItems(clientList, true))
                                 {
-                                    String antiCheatMessage = EnumChatFormatting.LIGHT_PURPLE + EnumChatFormatting.BOLD.toString() + "[" + PhoenixxMod.ANTICHEAT_SHORTNAME + "] " + EnumChatFormatting.AQUA + EnumChatFormatting.BOLD.toString() + player.getDisplayName() + EnumChatFormatting.GOLD + " was kicked for extra mods! Extra mods: " + extraMods;
-                                    ctx.getServerHandler().kickPlayerFromServer(EnumChatFormatting.GREEN + EnumChatFormatting.BOLD.toString() + "[" + PhoenixxMod.ANTICHEATNAME + " Anti-Cheat]\n" + EnumChatFormatting.RESET  +"You have been kicked.\n" + EnumChatFormatting.RED + "You have mods that this server does not support! Please remove them before connecting again.\nExtra mods: " + extraMods);
-                                    PhoenixxServerConfig.addToCheaterList(playerName + " kicked due to extra mods: " + extraMods);
-                                    //MinecraftServer.getServer().getConfigurationManager().sendChatMsg(new ChatComponentText(prefix + proofText));
-                                    //MinecraftServer.getServer().getConfigurationManager().sendChatMsg(new ChatComponentText(prefix + antiCheatMessage));
+                                    if(!canUserConnectWithExtraBadItems(playerName))
+                                    {
+                                        ctx.getServerHandler().kickPlayerFromServer(EnumChatFormatting.GREEN + EnumChatFormatting.BOLD.toString() + "[" + PhoenixxMod.ANTICHEATNAME + " Anti-Cheat]\n" + EnumChatFormatting.RESET  +"You have been kicked.\n" + EnumChatFormatting.RED + "You have mods that this server does not support! Please remove them before connecting again.\nExtra mods: " + extraMods);
+                                        PhoenixxServerConfig.addToCheaterList(playerName + " kicked due to extra mods: " + extraMods);
+                                    }
+                                }
+                            }
+                        }
+
+                        // Texture-packs
+                        if(message.messageID == 1)
+                        {
+                            if(!data.equals("NONE"))
+                            {
+                                clientList = new ArrayList<String>(Arrays.asList(data.split(",")));
+                                Collection<String> extraTexturePacks = getExtraBadItems(clientList);
+
+                                if(!PhoenixxServerConfig.allowTexturePacks && clientList != null && !clientList.isEmpty())
+                                {
+                                    if(!canUserConnectWithExtraBadItems(playerName))
+                                    {
+                                        ctx.getServerHandler().kickPlayerFromServer(EnumChatFormatting.GREEN + EnumChatFormatting.BOLD.toString() + "[" + PhoenixxMod.ANTICHEATNAME + " Anti-Cheat]\n" + EnumChatFormatting.RESET  +"You have been kicked.\n" + EnumChatFormatting.RED + "You have texture packs that this server does not support! Please remove them before connecting again.\nExtra packs: " + extraTexturePacks);
+                                        PhoenixxServerConfig.addToCheaterList(playerName + " kicked due to extra texture packs: " + extraTexturePacks);
+                                    }
                                 }
                             }
                         }
@@ -92,25 +111,32 @@ public class AntiCheat_Packet implements IMessage
         }
     }
 
-    private static boolean userHasExtraMods(ArrayList<String> clientMods)
+    private static boolean userHasExtraBadItems(ArrayList<String> badItems, boolean checkMods)
     {
-        boolean hasMods = true;
-        ArrayList<String> serverSideMods = PhoenixxServerConfig.getWhitelistedMods();
+        if(checkMods){
+            ArrayList<String> serverSideMods = PhoenixxServerConfig.getWhitelistedMods();
 
-        Collection<String> listOne = new ArrayList<>(serverSideMods);
-        Collection<String> listTwo = new ArrayList<>(clientMods);
+            Collection<String> listOne = new ArrayList<>(serverSideMods);
+            Collection<String> listTwo = new ArrayList<>(badItems);
 
-        listTwo.removeAll(listOne);
+            listTwo.removeAll(listOne);
 
-        if(listTwo.isEmpty())
-        {
-            hasMods = false;
+            if(listTwo.isEmpty())
+            {
+                return false;
+            }
+        } else {
+            Collection<String> listTwo = new ArrayList<>(badItems);
+
+            if(listTwo.isEmpty())
+            {
+                return false;
+            }
         }
-
-        return hasMods;
+        return true;
     }
 
-    private static Collection<String> getExtraMods(ArrayList<String> clientMods)
+    private static Collection<String> getExtraBadItems(ArrayList<String> clientMods)
     {
         ArrayList<String> serverSideMods = PhoenixxServerConfig.getWhitelistedMods();
 
@@ -122,7 +148,7 @@ public class AntiCheat_Packet implements IMessage
         return listTwo;
     }
 
-    private static boolean canUserConnectWithExtraMods(String username)
+    private static boolean canUserConnectWithExtraBadItems(String username)
     {
         ArrayList<String> playerModWhitelist = PhoenixxServerConfig.getModWhitelistedPlayers();
 

@@ -23,6 +23,7 @@ public class PhoenixxServerConfig
     private static final Properties serverProps = new Properties();
 
     public static boolean useAntiCheat;
+    public static boolean allowTexturePacks;
 
     public static String encodedWhitelistedMods = "null";
     private static ArrayList<String> whitelistedMods = new ArrayList<String>();
@@ -44,6 +45,7 @@ public class PhoenixxServerConfig
         loadConfig();
         loadExtraFiles();
         useAntiCheat = (Boolean) PhoenixxConfig.loadProp(serverProps, useAntiCheat, Boolean.TRUE, "useAntiCheat");
+        allowTexturePacks = (Boolean) PhoenixxConfig.loadProp(serverProps, allowTexturePacks, Boolean.FALSE, "allowTexturePacks");
 
         /** Whitelisted mods **/
         encodedWhitelistedMods = (String)PhoenixxConfig.loadProp(serverProps, encodedWhitelistedMods,"mcp,FML,Forge,"+PhoenixxMod.MODID,"whitelistMods");
