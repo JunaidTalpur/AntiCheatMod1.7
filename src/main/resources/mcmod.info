@@ -1,0 +1,16 @@
+[
+{
+  "modid": "phoenixx",
+  "name": "AJGaming Anti-Cheat",
+  "description": "Mod Created by Phoenixx. Discord: Phoenix#5518 All rights reserved. Copyright(2018)",
+  "version": "1.0.0",
+  "mcversion": "1.7.10",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Phoenixx"],
+  "credits": "Phoenixx",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
